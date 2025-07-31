@@ -47,8 +47,7 @@ jobs:
         run: |
           CONFIG="${GITHUB_WORKSPACE}/.tflint.hcl"
           tflint --init -c "$CONFIG"
-          # Use --chdir instead of a positional directory
-          tflint -c "$CONFIG" --chdir infra --recursive
+          tflint -c "$CONFIG" --chdir "${GITHUB_WORKSPACE}/infra" --recursive
 
       - name: tfsec
         working-directory: infra
