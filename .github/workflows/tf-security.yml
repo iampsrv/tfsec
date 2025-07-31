@@ -5,7 +5,7 @@ on:
     paths: [ 'infra/**' ]
   push:
     branches: [ master ]
-    paths: [ 'infra/**' ]
+    # paths: [ 'infra/**' ]
 
 jobs:
   lint-secure-plan:
