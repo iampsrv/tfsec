@@ -45,8 +45,8 @@ jobs:
       - name: TFLint
         working-directory: infra
         run: |
-          tflint --init
-          tflint -c .tflint.hcl --recursive
+          tflint --init -c ../.tflint.hcl
+          tflint -c ../.tflint.hcl --recursive
 
       - name: tfsec
         working-directory: infra
