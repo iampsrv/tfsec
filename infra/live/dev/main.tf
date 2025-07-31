@@ -33,10 +33,10 @@ resource "aws_security_group" "ssh" {
   }
 
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
 
@@ -62,11 +62,11 @@ data "aws_ami" "al2023" {
 }
 
 resource "aws_instance" "this" {
-  ami                    = data.aws_ami.al2023.id
-  instance_type          = var.instance_type
-  subnet_id              = local.subnet_id
-  vpc_security_group_ids = local.sg_ids
-  key_name               = var.key_name
+  ami                         = data.aws_ami.al2023.id
+  instance_type               = var.instance_type
+  subnet_id                   = local.subnet_id
+  vpc_security_group_ids      = local.sg_ids
+  key_name                    = var.key_name
   associate_public_ip_address = true
 
   metadata_options {
@@ -74,7 +74,7 @@ resource "aws_instance" "this" {
   }
 
   root_block_device {
-    encrypted = true
+    encrypted   = true
     volume_size = 8
   }
 
