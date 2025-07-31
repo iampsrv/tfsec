@@ -1,39 +1,32 @@
 package terraform.aws
 
+# EC2 root volume must be encrypted
 deny[msg] {
-  input.resource_type == "aws_security_group_rule"
-  input.resource.cidr_blocks[_] == "0.0.0.0/0"
-  input.resource.from_port <= 22
-  input.resource.to_port   >= 22
-  msg := "SSH ingress from 0.0.0.0/0 is not allowed"
+  rc := input.resource_changes[_]
+  rc.type == "aws_instance"
+  after := rc.change.after
+  block := after.root_block_device[_]   # bind an element first
+  not block.encrypted                   # now it's safe to negate
+  msg := sprintf("EC2 root volume must be encrypted: %s", [rc.address])
 }
 
-
-# Deny if EC2 root volume is not encrypted
+# EC2 must require IMDSv2 (http_tokens=required)
 deny[msg] {
-  some i
-  input.resource_changes[i].type == "aws_instance"
-  after := input.resource_changes[i].change.after
-  not after.root_block_device[_].encrypted
-  msg := sprintf("EC2 root volume must be encrypted: %s", [input.resource_changes[i].address])
+  rc := input.resource_changes[_]
+  rc.type == "aws_instance"
+  after := rc.change.after
+  mo := after.metadata_options[_]       # bind element first
+  mo.http_tokens != "required"
+  msg := sprintf("EC2 must require IMDSv2 (http_tokens=required): %s", [rc.address])
 }
 
-# Deny if EC2 does not require IMDSv2
+# Optional: block wide‑open SSH rules if you add SG rules later
 deny[msg] {
-  some i
-  input.resource_changes[i].type == "aws_instance"
-  after := input.resource_changes[i].change.after
-  not after.metadata_options[_].http_tokens == "required"
-  msg := sprintf("EC2 must require IMDSv2 (http_tokens=required): %s", [input.resource_changes[i].address])
-}
-
-# Optional: fail if a wide-open SSH rule is added (kept for future SG changes)
-deny[msg] {
-  some i
-  input.resource_changes[i].type == "aws_security_group_rule"
-  after := input.resource_changes[i].change.after
+  rc := input.resource_changes[_]
+  rc.type == "aws_security_group_rule"
+  after := rc.change.after
   after.cidr_blocks[_] == "0.0.0.0/0"
   after.from_port <= 22
   after.to_port   >= 22
-  msg := sprintf("SSH from 0.0.0.0/0 not allowed: %s", [input.resource_changes[i].address])
+  msg := sprintf("SSH from 0.0.0.0/0 not allowed: %s", [rc.address])
 }
