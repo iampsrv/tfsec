@@ -1,6 +1,3 @@
-#provider "aws" {
-#  region = var.region
-#}
 terraform {
   required_version = ">= 1.6.0, < 2.0.0"
 
@@ -10,6 +7,9 @@ terraform {
       version = "~> 5.0"
     }
   }
+}
+provider "aws" {
+  region = var.region
 }
 
 data "aws_vpc" "default" {
