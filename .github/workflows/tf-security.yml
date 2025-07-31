@@ -45,6 +45,22 @@ jobs:
       - name: Terraform validate
         run: terraform validate -no-color
 
+      - name: Gitleaks (secrets scan)
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          # Optional: provide a config if you have one
+          # config-path: .github/gitleaks.toml
+          args: >
+            detect
+            --source .
+            --no-banner
+            --redact
+            --verbose
+            --exit-code 1
+          # (Optional) output report
+          # report-format: sarif
+          # report-path: gitleaks.sarif
+  
       - name: Install TFLint
         run: |
           curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
