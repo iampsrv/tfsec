@@ -45,8 +45,9 @@ jobs:
       - name: TFLint
         working-directory: infra
         run: |
-          tflint --init -c ../.tflint.hcl
-          tflint -c ../.tflint.hcl --recursive
+          CONFIG="${GITHUB_WORKSPACE}/.tflint.hcl"
+          tflint --init -c "$CONFIG"
+           tflint -c "$CONFIG" --recursive infra
 
       - name: tfsec
         working-directory: infra
