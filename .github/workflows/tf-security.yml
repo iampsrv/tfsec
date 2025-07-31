@@ -68,11 +68,27 @@ jobs:
       - name: Show plan JSON
         run: terraform show -json plan.out > plan.json
 
-      - name: Conftest (OPA policy checks)
-        working-directory: infra
+      - name: Install Conftest
+        working-directory: ${{ github.workspace }}
         run: |
-          curl -sSL https://raw.githubusercontent.com/open-policy-agent/conftest/master/install.sh | bash
-          ./conftest test live/dev/plan.json -p policies
+          set -e
+          CONFTEST_VERSION=0.52.0   # pick any supported version
+          curl -sL "https://github.com/open-policy-agent/conftest/releases/download/v${CONFTEST_VERSION}/conftest_${CONFTEST_VERSION}_Linux_x86_64.tar.gz" -o conftest.tar.gz
+          tar -xzf conftest.tar.gz
+          sudo mv conftest /usr/local/bin/
+          conftest --version
+      
+      - name: Conftest (OPA policy checks)
+        working-directory: ${{ github.workspace }}
+        run: |
+          # Adjust paths if your files live elsewhere
+          conftest test infra/live/dev/plan.json -p infra/policies  
+
+      # - name: Conftest (OPA policy checks)
+      #   working-directory: infra
+      #   run: |
+      #     curl -sSL https://raw.githubusercontent.com/open-policy-agent/conftest/master/install.sh | bash
+      #     ./conftest test live/dev/plan.json -p policies
 
       - name: Upload plan and reports
         if: always()
