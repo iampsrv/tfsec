@@ -78,20 +78,20 @@ jobs:
           sudo mv conftest /usr/local/bin/
           conftest --version
 
-      - name: Conftest (OPA policy checks)
-        working-directory: ${{ github.workspace }}
-        run: |
-          conftest test \
-            --input terraform-plan \
-            --combine \
-            -p infra/policies \
-            infra/live/dev/plan.json
-      
       # - name: Conftest (OPA policy checks)
       #   working-directory: ${{ github.workspace }}
       #   run: |
-      #     # Adjust paths if your files live elsewhere
-      #     conftest test infra/live/dev/plan.json -p infra/policies  
+      #     conftest test \
+      #       --input terraform-plan \
+      #       --combine \
+      #       -p infra/policies \
+      #       infra/live/dev/plan.json
+      
+      - name: Conftest (OPA policy checks)
+        working-directory: ${{ github.workspace }}
+        run: |
+          # Adjust paths if your files live elsewhere
+          conftest test infra/live/dev/plan.json -p infra/policies  
 
       # - name: Conftest (OPA policy checks)
       #   working-directory: infra
