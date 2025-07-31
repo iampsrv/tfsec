@@ -47,7 +47,7 @@ jobs:
         run: |
           CONFIG="${GITHUB_WORKSPACE}/.tflint.hcl"
           tflint --init -c "$CONFIG"
-           tflint -c "$CONFIG" --recursive infra
+          tflint -c "$CONFIG" --recursive infra
 
       - name: tfsec
         working-directory: infra
