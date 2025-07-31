@@ -30,7 +30,7 @@ jobs:
           terraform_version: ~1.6
 
       - name: Terraform fmt (check)
-        run: terraform fmt -check -recursive
+        run: terraform fmt -check -recursive -diff
 
       - name: Terraform init
         run: terraform init -input=false
