@@ -1,0 +1,14 @@
+repos:
+- repo: https://github.com/antonbabenko/pre-commit-terraform
+  rev: v1.94.1
+  hooks:
+    - id: terraform_fmt
+    - id: terraform_validate
+    - id: terraform_tflint
+      args: ["--args=--config=infra/.tflint.hcl"]
+    - id: terraform_tfsec
+      args: ["--args=--config-file=infra/.tfsec.yml"]
+    - id: terraform_checkov
+      args: ["--args=--config-file=infra/.checkov.yaml"]
+    - id: terraform_docs
+      args: ["--args=--hide-inputs"]

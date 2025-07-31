@@ -1,0 +1,76 @@
+name: tf-security
+
+on:
+  pull_request:
+    paths: [ 'infra/**' ]
+  push:
+    branches: [ master ]
+    paths: [ 'infra/**' ]
+
+jobs:
+  lint-secure-plan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      actions: read
+
+    defaults:
+      run:
+        working-directory: infra/live/dev
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+          terraform_version: ~1.6
+
+      - name: Terraform fmt (check)
+        run: terraform fmt -check -recursive
+
+      - name: Terraform init
+        run: terraform init -input=false
+
+      - name: Terraform validate
+        run: terraform validate -no-color
+
+      - name: Install TFLint
+        run: |
+          curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+          tflint --version
+      - name: TFLint
+        working-directory: infra
+        run: |
+          tflint --init
+          tflint -c .tflint.hcl --recursive
+
+      - name: tfsec
+        working-directory: infra
+        run: |
+          curl -sSL https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
+          tfsec --config-file .tfsec.yml --soft-fail=false .
+
+      - name: Terraform plan
+        run: terraform plan -no-color -out=plan.out
+
+      - name: Show plan JSON
+        run: terraform show -json plan.out > plan.json
+
+      - name: Conftest (OPA policy checks)
+        working-directory: infra
+        run: |
+          curl -sSL https://raw.githubusercontent.com/open-policy-agent/conftest/master/install.sh | bash
+          ./conftest test live/dev/plan.json -p policies
+
+      - name: Upload plan and reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan-and-reports
+          path: |
+            infra/live/dev/plan.out
+            infra/live/dev/plan.json
